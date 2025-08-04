@@ -1,432 +1,451 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hit the Ethereum OS</title>
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-            color: #e0e0e0;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            font-size: 2.5rem;
-            color: #ffffff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
-        }
-        #game-container {
-            width: 90%;
-            max-width: 900px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-        canvas {
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            background: rgba(0,0,0,0.2);
-            border-radius: 10px;
-            cursor: none;
-            touch-action: none;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
-        }
-        #game-controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-        }
-        #game-info {
-            display: flex;
-            justify-content: space-around;
-            width: 100%;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #ffffff;
-            margin-bottom: 20px;
-        }
-        button {
-            padding: 12px 24px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: white;
-            background: linear-gradient(135deg, #a73cff, #5e00b8);
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-        }
-        button:disabled {
-            background: #4a4a5a;
-            cursor: not-allowed;
-            transform: translateY(0);
-            box-shadow: none;
-        }
-        button:hover:enabled {
-            background: linear-gradient(135deg, #c261ff, #7f2ad8);
-            transform: translateY(-2px);
-        }
-        button:active:enabled {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hit the Ethereum OS</title>
+  <style>
+    /* style tetap sama seperti sebelumnya */
+    body {
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #e0e0e0;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 2.5rem;
+      color: #ffffff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      margin-bottom: 20px;
+    }
+    #game-container {
+      width: 90%;
+      max-width: 900px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+    canvas {
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      cursor: none;
+      touch-action: none;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+    #game-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    #game-info {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #ffffff;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #a73cff, #5e00b8);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      transition: all 0.3s ease;
+    }
+    button:disabled {
+      background: #4a4a5a;
+      cursor: not-allowed;
+      transform: translateY(0);
+      box-shadow: none;
+    }
+    button:hover:enabled {
+      background: linear-gradient(135deg, #c261ff, #7f2ad8);
+      transform: translateY(-2px);
+    }
+    button:active:enabled {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
 <body>
-    <h1>Hit the Ethereum OS</h1>
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
-        <div id="game-controls">
-            <div id="game-info">
-                <span>Skor: <span id="score">0</span></span>
-                <span>Waktu: <span id="timer">60</span></span>
-                <span>Skor Tertinggi: <span id="high-score">0</span></span>
-            </div>
-            <button id="start-game-btn" disabled>Mulai Permainan</button>
-        </div>
+  <h1>Hit the Ethereum OS</h1>
+  <div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+    <div id="game-controls">
+      <div id="game-info">
+        <span>Skor: <span id="score">0</span></span>
+        <span>Waktu: <span id="timer">60</span></span>
+        <span>Skor Tertinggi: <span id="high-score">0</span></span>
+      </div>
+      <button id="start-game-btn" disabled>Mulai Permainan</button>
     </div>
+  </div>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const startGameBtn = document.getElementById('start-game-btn');
-        const scoreDisplay = document.getElementById('score');
-        const timerDisplay = document.getElementById('timer');
-        const highScoreDisplay = document.getElementById('high-score');
+  <!-- Suara -->
+  <audio id="hitSound" preload="auto">
+    <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" />
+  </audio>
 
-        // Sesuaikan ukuran canvas agar responsif
-        const container = document.getElementById('game-container');
-        let gameWidth, gameHeight;
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const startGameBtn = document.getElementById('start-game-btn');
+    const scoreDisplay = document.getElementById('score');
+    const timerDisplay = document.getElementById('timer');
+    const highScoreDisplay = document.getElementById('high-score');
+    const hitSound = document.getElementById('hitSound');
 
-        window.addEventListener('resize', resizeCanvas);
-        function resizeCanvas() {
-            gameWidth = container.clientWidth - 40;
-            gameHeight = gameWidth * 0.75;
-            canvas.width = gameWidth;
-            canvas.height = gameHeight;
-            draw();
-        }
+    const container = document.getElementById('game-container');
+    let gameWidth, gameHeight;
 
-        let score = 0;
-        let highScore = localStorage.getItem('ethereumOSHighScore') || 0;
-        let gameTimeLeft = 60;
-        let gameRunning = false;
-        let targets = [];
-        let particles = [];
-        let lastTargetSpawn = 0;
-        const spawnInterval = 700;
-        let lastTime = 0;
-        let message = "Memuat Aset...";
-        const targetSize = 80;
-        let mouseX = 0;
-        let mouseY = 0;
-        let hammerHit = false;
+    // resize
+    window.addEventListener('resize', resizeCanvas);
+    function resizeCanvas() {
+      gameWidth = container.clientWidth - 40;
+      gameHeight = gameWidth * 0.75;
+      canvas.width = gameWidth;
+      canvas.height = gameHeight;
+      draw();
+    }
 
-        const holePositions = [
-            { x: 100, y: 150 }, { x: 300, y: 150 }, { x: 500, y: 150 }, { x: 700, y: 150 },
-            { x: 200, y: 350 }, { x: 400, y: 350 }, { x: 600, y: 350 }, { x: 800, y: 350 }
-        ];
+    let score = 0;
+    let highScore = +localStorage.getItem('ethereumOSHighScore') || 0;
+    let gameTimeLeft = 60;
+    let gameRunning = false;
+    let targets = [];
+    let particles = [];
+    let lastTargetSpawn = 0;
+    const spawnInterval = 700;
+    let lastTime = 0;
+    let message = "Memuat Aset...";
+    const targetSize = 80;
+    let mouseX = 0;
+    let mouseY = 0;
+    let hammerHit = false;
 
-        // Load semua aset gambar
-        const ethOSLogo = new Image();
-        ethOSLogo.src = 'photo_6030520145765582592_c.png';
-        const holeImage = new Image();
-        holeImage.src = 'https://placehold.co/100x50/13294b/d1e2f7?text=Crater';
-        const hammerImage = new Image();
-        hammerImage.src = 'https://www.flaticon.com/svg/static/icons/svg/1054/1054415.svg';
+    const holePositions = [
+      { x: 100, y: 150 }, { x: 300, y: 150 }, { x: 500, y: 150 }, { x: 700, y: 150 },
+      { x: 200, y: 350 }, { x: 400, y: 350 }, { x: 600, y: 350 }, { x: 800, y: 350 }
+    ];
 
-        let imagesLoadedCount = 0;
-        const totalImages = 3;
+    // gambar
+    const ethOSLogo = new Image();
+    ethOSLogo.src = 'photo_6030520145765582592_c.png';
+    const holeImage = new Image();
+    holeImage.src = createHoleSVG();
+    const hammerImage = new Image();
+    hammerImage.src = createHammerSVG();
 
-        function checkImagesLoaded() {
-            imagesLoadedCount++;
-            if (imagesLoadedCount === totalImages) {
-                message = "Klik Mulai Permainan";
-                startGameBtn.disabled = false;
-                resizeCanvas();
-            }
-        }
+    let imagesLoadedCount = 0;
+    const totalImages = 3;
 
-        ethOSLogo.onload = checkImagesLoaded;
-        ethOSLogo.onerror = () => {
-            ethOSLogo.src = 'https://placehold.co/80x80/2980b9/ffffff?text=OS';
-            checkImagesLoaded();
-        };
-
-        holeImage.onload = checkImagesLoaded;
-        holeImage.onerror = () => {
-             message = "Gagal memuat gambar lubang.";
-             checkImagesLoaded();
-        };
-
-        hammerImage.onload = checkImagesLoaded;
-        hammerImage.onerror = () => {
-            // Gunakan kursor default jika gambar palu gagal dimuat
-            canvas.style.cursor = 'pointer';
-            message = "Gagal memuat gambar palu. Menggunakan kursor default.";
-            checkImagesLoaded();
-        };
-
+    function checkImagesLoaded() {
+      imagesLoadedCount++;
+      if (imagesLoadedCount === totalImages) {
+        message = "Klik Mulai Permainan";
+        startGameBtn.disabled = false;
         resizeCanvas();
+      }
+    }
 
-        function updateHighScoreDisplay() {
-            highScoreDisplay.textContent = highScore;
+    ethOSLogo.onload = checkImagesLoaded;
+    ethOSLogo.onerror = () => {
+      ethOSLogo.src = 'https://placehold.co/80x80/2980b9/ffffff?text=OS';
+      checkImagesLoaded();
+    };
+    holeImage.onload = checkImagesLoaded;
+    hammerImage.onload = checkImagesLoaded;
+
+    resizeCanvas();
+
+    function updateHighScoreDisplay() {
+      highScoreDisplay.textContent = highScore;
+    }
+    updateHighScoreDisplay();
+
+    class Target {
+      constructor(position) {
+        this.x = position.x;
+        this.y = position.y;
+        this.width = targetSize;
+        this.height = targetSize;
+        this.timeToLive = 1500;
+        this.hit = false;
+        this.scale = 0;
+      }
+
+      update(deltaTime) {
+        // overshoot pop-up
+        if (this.scale < 1) {
+          this.scale = Math.min(1, this.scale + deltaTime / 350);
         }
-        updateHighScoreDisplay();
-        
-        class Target {
-            constructor(position) {
-                this.x = position.x;
-                this.y = position.y;
-                this.width = targetSize;
-                this.height = targetSize;
-                this.timeToLive = 1500;
-                this.hit = false;
-                this.scale = 0;
-            }
+      }
 
-            update(deltaTime) {
-                if (this.scale < 1) {
-                    this.scale += deltaTime / 500;
-                }
-            }
-
-            draw() {
-                if (this.hit) return;
-                const scaledSize = targetSize * Math.min(1, this.scale);
-                const xOffset = (targetSize - scaledSize) / 2;
-                const yOffset = (targetSize - scaledSize) / 2;
-                if (ethOSLogo.complete && ethOSLogo.naturalWidth !== 0) {
-                  ctx.drawImage(ethOSLogo, this.x + xOffset, this.y + yOffset, scaledSize, scaledSize);
-                }
-            }
+      draw() {
+        if (this.hit) return;
+        const scaledSize = targetSize * this.scale;
+        const xOffset = (targetSize - scaledSize) / 2;
+        const yOffset = (targetSize - scaledSize) / 2;
+        if (ethOSLogo.complete && ethOSLogo.naturalWidth !== 0) {
+          ctx.drawImage(ethOSLogo, this.x + xOffset, this.y + yOffset, scaledSize, scaledSize);
         }
+      }
+    }
 
-        class Particle {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.radius = Math.random() * 5 + 2;
-                this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                this.velocity = {
-                    x: (Math.random() - 0.5) * 5,
-                    y: (Math.random() - 0.5) * 5
-                };
-                this.timeToLive = 1000;
-            }
+    class Particle {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.radius = Math.random() * 5 + 2;
+        this.color = `hsl(${Math.random() * 40 + 240}, 100%, 65%)`; // ungu-biru-cyan
+        this.velocity = {
+          x: (Math.random() - 0.5) * 5,
+          y: (Math.random() - 0.5) * 5
+        };
+        this.timeToLive = 1000;
+      }
 
-            update(deltaTime) {
-                this.x += this.velocity.x * (deltaTime / 16.67);
-                this.y += this.velocity.y * (deltaTime / 16.67);
-                this.timeToLive -= deltaTime;
-            }
+      update(deltaTime) {
+        this.x += this.velocity.x * (deltaTime / 16.67);
+        this.y += this.velocity.y * (deltaTime / 16.67);
+        this.timeToLive -= deltaTime;
+      }
 
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.fill();
-                ctx.closePath();
-            }
-        }
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = this.color;
+        ctx.fill();
+        ctx.closePath();
+      }
+    }
 
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            if (holeImage.complete && holeImage.naturalWidth !== 0) {
-              holePositions.forEach(hole => {
-                ctx.drawImage(holeImage, hole.x - 10, hole.y + targetSize - 20, 100, 50);
-              });
-            }
-            
-            targets.forEach(target => {
-                target.draw();
-            });
-
-            particles.forEach(particle => {
-                particle.draw();
-            });
-
-            // Gambar palu
-            const hammerSize = 64;
-            let hammerScale = 1;
-            let hammerRotation = 0;
-
-            if (hammerHit) {
-                hammerScale = 0.9;
-                hammerRotation = -10 * Math.PI / 180;
-            }
-
-            if (hammerImage.complete && hammerImage.naturalWidth !== 0) {
-              ctx.save();
-              ctx.translate(mouseX, mouseY);
-              ctx.rotate(hammerRotation);
-              ctx.scale(hammerScale, hammerScale);
-              ctx.drawImage(hammerImage, -hammerSize / 2, -hammerSize / 2, hammerSize, hammerSize);
-              ctx.restore();
-            }
-
-            if (!gameRunning) {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#ffffff';
-                ctx.font = 'bold 36px Inter';
-                ctx.textAlign = 'center';
-                ctx.shadowColor = 'black';
-                ctx.shadowBlur = 5;
-                ctx.fillText(message, canvas.width / 2, canvas.height / 2);
-                ctx.shadowBlur = 0;
-            }
-        }
-
-        function update(deltaTime) {
-            if (!gameRunning) return;
-
-            gameTimeLeft -= deltaTime / 1000;
-            timerDisplay.textContent = Math.max(0, Math.floor(gameTimeLeft));
-
-            if (gameTimeLeft <= 0) {
-                endGame();
-                return;
-            }
-
-            targets.forEach(target => target.update(deltaTime));
-            targets = targets.filter(target => {
-                target.timeToLive -= deltaTime;
-                return target.timeToLive > 0 && !target.hit;
-            });
-
-            particles.forEach(particle => particle.update(deltaTime));
-            particles = particles.filter(particle => particle.timeToLive > 0);
-
-            if (Date.now() - lastTargetSpawn > spawnInterval) {
-                spawnTarget();
-                lastTargetSpawn = Date.now();
-            }
-        }
-
-        function gameLoop(currentTime) {
-            const deltaTime = currentTime - lastTime;
-            lastTime = currentTime;
-            update(deltaTime);
-            draw();
-
-            if (gameRunning) {
-                requestAnimationFrame(gameLoop);
-            }
-        }
-
-        function startGame() {
-            if (gameRunning || imagesLoadedCount < totalImages) return;
-
-            score = 0;
-            gameTimeLeft = 60;
-            gameRunning = true;
-            targets = [];
-            particles = [];
-            scoreDisplay.textContent = score;
-            timerDisplay.textContent = Math.floor(gameTimeLeft);
-            startGameBtn.disabled = true;
-
-            lastTargetSpawn = Date.now();
-            lastTime = performance.now();
-            requestAnimationFrame(gameLoop);
-        }
-
-        function endGame() {
-            gameRunning = false;
-            startGameBtn.disabled = false;
-            
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('ethereumOSHighScore', highScore);
-                updateHighScoreDisplay();
-                message = `Skor Tertinggi Baru: ${score}`;
-            } else {
-                message = `Permainan Selesai! Skor Anda: ${score}`;
-            }
-            draw();
-        }
-
-        function spawnTarget() {
-            const availableHoles = holePositions.filter(hole => {
-                return !targets.some(target => target.x === hole.x && target.y === hole.y);
-            });
-            if (availableHoles.length > 0) {
-                const randomHole = availableHoles[Math.floor(Math.random() * availableHoles.length)];
-                targets.push(new Target(randomHole));
-            }
-        }
-
-        function checkHit(event) {
-            if (!gameRunning) return;
-
-            const rect = canvas.getBoundingClientRect();
-            const clientX = event.clientX || (event.touches[0] ? event.touches[0].clientX : 0);
-            const clientY = event.clientY || (event.touches[0] ? event.touches[0].clientY : 0);
-            const x = (clientX - rect.left) / (rect.right - rect.left) * canvas.width;
-            const y = (clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
-
-            for (let i = 0; i < targets.length; i++) {
-                const target = targets[i];
-                if (x > target.x && x < target.x + target.width && y > target.y && y < target.y + target.height) {
-                    score++;
-                    scoreDisplay.textContent = score;
-                    target.hit = true;
-                    setTimeout(() => {
-                        targets.splice(i, 1);
-                    }, 200);
-
-                    for (let j = 0; j < 10; j++) {
-                        particles.push(new Particle(x, y));
-                    }
-                    return;
-                }
-            }
-        }
-
-        startGameBtn.addEventListener('click', startGame);
-        
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            mouseX = (e.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
-            mouseY = (e.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
+      // lubang
+      if (holeImage.complete && holeImage.naturalWidth !== 0) {
+        holePositions.forEach(hole => {
+          ctx.drawImage(holeImage, hole.x - 10, hole.y + targetSize - 20, 100, 50);
         });
+      }
 
-        canvas.addEventListener('mousedown', (e) => {
-            hammerHit = true;
-            checkHit(e);
-        });
-        canvas.addEventListener('mouseup', () => {
-            hammerHit = false;
-        });
-        canvas.addEventListener('touchstart', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            mouseX = (e.touches[0].clientX - rect.left) / (rect.right - rect.left) * canvas.width;
-            mouseY = (e.touches[0].clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
-            hammerHit = true;
-            checkHit(e);
-        }, { passive: false });
-        canvas.addEventListener('touchend', () => {
-            hammerHit = false;
-        });
+      targets.forEach(target => target.draw());
+      particles.forEach(particle => particle.draw());
 
-    </script>
+      // palu
+      const hammerSize = 64;
+      let scale = hammerHit ? 0.9 : 1;
+      let rot = hammerHit ? -10 * Math.PI / 180 : 0;
+
+      if (hammerImage.complete && hammerImage.naturalWidth !== 0) {
+        ctx.save();
+        ctx.translate(mouseX, mouseY);
+        ctx.rotate(rot);
+        ctx.scale(scale, scale);
+        ctx.drawImage(hammerImage, -hammerSize / 2, -hammerSize / 2, hammerSize, hammerSize);
+        ctx.restore();
+      }
+
+      if (!gameRunning) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 36px Inter';
+        ctx.textAlign = 'center';
+        ctx.shadowColor = 'black';
+        ctx.shadowBlur = 5;
+        ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    function update(deltaTime) {
+      if (!gameRunning) return;
+
+      gameTimeLeft -= deltaTime / 1000;
+      timerDisplay.textContent = Math.max(0, Math.floor(gameTimeLeft));
+
+      if (gameTimeLeft <= 0) {
+        endGame();
+        return;
+      }
+
+      targets.forEach(target => target.update(deltaTime));
+      targets = targets.filter(target => {
+        target.timeToLive -= deltaTime;
+        return target.timeToLive > 0 && !target.hit;
+      });
+
+      particles.forEach(particle => particle.update(deltaTime));
+      particles = particles.filter(particle => particle.timeToLive > 0);
+
+      if (Date.now() - lastTargetSpawn > spawnInterval) {
+        spawnTarget();
+        lastTargetSpawn = Date.now();
+      }
+    }
+
+    function gameLoop(currentTime) {
+      const deltaTime = currentTime - lastTime;
+      lastTime = currentTime;
+      update(deltaTime);
+      draw();
+
+      if (gameRunning) {
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    function startGame() {
+      if (gameRunning || imagesLoadedCount < totalImages) return;
+
+      score = 0;
+      gameTimeLeft = 60;
+      gameRunning = true;
+      targets = [];
+      particles = [];
+      scoreDisplay.textContent = score;
+      timerDisplay.textContent = Math.floor(gameTimeLeft);
+      startGameBtn.disabled = true;
+
+      lastTargetSpawn = Date.now();
+      lastTime = performance.now();
+      requestAnimationFrame(gameLoop);
+    }
+
+    function endGame() {
+      gameRunning = false;
+      startGameBtn.disabled = false;
+
+      // reload high-score dari localStorage (supaya sinkron antar-tab)
+      const currentStored = +localStorage.getItem('ethereumOSHighScore') || 0;
+      highScore = Math.max(score, currentStored);
+      localStorage.setItem('ethereumOSHighScore', highScore);
+      updateHighScoreDisplay();
+
+      if (score > currentStored) {
+        message = `Skor Tertinggi Baru: ${score}`;
+      } else {
+        message = `Permainan Selesai! Skor Anda: ${score}`;
+      }
+      draw();
+    }
+
+    function spawnTarget() {
+      const availableHoles = holePositions.filter(hole => {
+        return !targets.some(target => target.x === hole.x && target.y === hole.y);
+      });
+      if (availableHoles.length > 0) {
+        const randomHole = availableHoles[Math.floor(Math.random() * availableHoles.length)];
+        targets.push(new Target(randomHole));
+      }
+    }
+
+    function checkHit(event) {
+      if (!gameRunning) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const clientX = event.clientX || (event.touches[0] ? event.touches[0].clientX : 0);
+      const clientY = event.clientY || (event.touches[0] ? event.touches[0].clientY : 0);
+      const x = (clientX - rect.left) / (rect.right - rect.left) * canvas.width;
+      const y = (clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
+
+      for (let i = 0; i < targets.length; i++) {
+        const target = targets[i];
+        if (x > target.x && x < target.x + target.width && y > target.y && y < target.y + target.height) {
+          score++;
+          scoreDisplay.textContent = score;
+          target.hit = true;
+          setTimeout(() => {
+            targets.splice(i, 1);
+          }, 200);
+
+          // suara
+          hitSound.currentTime = 0;
+          hitSound.play().catch(() => {});
+
+          // particle
+          for (let j = 0; j < 10; j++) {
+            particles.push(new Particle(x, y));
+          }
+          return;
+        }
+      }
+    }
+
+    startGameBtn.addEventListener('click', startGame);
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = (e.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
+      mouseY = (e.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+      hammerHit = true;
+      checkHit(e);
+    });
+    canvas.addEventListener('mouseup', () => {
+      hammerHit = false;
+    });
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      mouseX = (e.touches[0].clientX - rect.left) / (rect.right - rect.left) * canvas.width;
+      mouseY = (e.touches[0].clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
+      hammerHit = true;
+      checkHit(e);
+    }, { passive: false });
+    canvas.addEventListener('touchend', () => {
+      hammerHit = false;
+    });
+
+    // disable context menu
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+    // helper SVG
+    function createHoleSVG() {
+      const svg = `
+        <svg width="100" height="50" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="50" cy="25" rx="50" ry="25" fill="#111827"/>
+          <ellipse cx="50" cy="25" rx="40" ry="20" fill="#374151"/>
+        </svg>
+      `;
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    function createHammerSVG() {
+      const svg = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+          <path fill="#d1d5db" d="M502.6 117.3l-107.9-107.9c-12.5-12.5-32.8-12.5-45.3 0l-107.9 107.9c-12.5 12.5-12.5 32.8 0 45.3l107.9 107.9c12.5 12.5 32.8 12.5 45.3 0l107.9-107.9c12.5-12.5 12.5-32.8 0-45.3z"/>
+          <path fill="#9ca3af" d="M283.3 283.3L117.3 117.3c-12.5-12.5-32.8-12.5-45.3 0L28.7 166.7c-12.5 12.5-12.5 32.8 0 45.3L166.7 350c12.5 12.5 32.8 12.5 45.3 0l49.3-49.3c12.5-12.5 12.5-32.8 0-45.3z"/>
+        </svg>
+      `;
+      return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+  </script>
 </body>
 </html>
