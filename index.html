@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Hit the Ethereum OS</title>
   <style>
-    /* style tetap sama seperti sebelumnya */
     body {
       font-family: 'Inter', sans-serif;
       display: flex;
@@ -144,6 +143,10 @@
     let mouseX = 0;
     let mouseY = 0;
     let hammerHit = false;
+    
+    // Variabel untuk pesan spesial
+    let specialMessage = null;
+    let specialMessageTimer = 0;
 
     const holePositions = [
       { x: 100, y: 150 }, { x: 300, y: 150 }, { x: 500, y: 150 }, { x: 700, y: 150 },
@@ -156,7 +159,7 @@
     const holeImage = new Image();
     holeImage.src = createHoleSVG();
     const hammerImage = new Image();
-    hammerImage.src = createHammerSVG();
+    hammerImage.src = '1efe1d23e010ac80d4d4fd5cbbd5e60e.png';
 
     let imagesLoadedCount = 0;
     const totalImages = 3;
@@ -194,12 +197,25 @@
         this.timeToLive = 1500;
         this.hit = false;
         this.scale = 0;
+        this.isExiting = false;
+        this.exitScale = 1.2;
+        this.exitX = 0;
+        this.exitY = 0;
       }
 
       update(deltaTime) {
         // overshoot pop-up
-        if (this.scale < 1) {
+        if (this.scale < 1 && !this.isExiting) {
           this.scale = Math.min(1, this.scale + deltaTime / 350);
+        }
+
+        // exit animation
+        if (this.isExiting) {
+          const exitDuration = 500;
+          const progress = Math.min(1, deltaTime / exitDuration);
+          this.x = this.exitX + (this.x - this.exitX) * (1 - progress);
+          this.y = this.exitY + (this.y - this.exitY) * (1 - progress);
+          this.scale = this.exitScale * (1 - progress);
         }
       }
 
@@ -256,7 +272,7 @@
       particles.forEach(particle => particle.draw());
 
       // palu
-      const hammerSize = 64;
+      const hammerSize = 80;
       let scale = hammerHit ? 0.9 : 1;
       let rot = hammerHit ? -10 * Math.PI / 180 : 0;
 
@@ -267,6 +283,14 @@
         ctx.scale(scale, scale);
         ctx.drawImage(hammerImage, -hammerSize / 2, -hammerSize / 2, hammerSize, hammerSize);
         ctx.restore();
+      }
+
+      // Rendering pesan spesial
+      if (specialMessage) {
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.font = 'bold 24px Inter'; // Ukuran font lebih kecil
+        ctx.textAlign = 'center';
+        ctx.fillText(specialMessage.text, specialMessage.x, specialMessage.y);
       }
 
       if (!gameRunning) {
@@ -284,6 +308,14 @@
 
     function update(deltaTime) {
       if (!gameRunning) return;
+
+      // Kurangi timer pesan spesial
+      if (specialMessageTimer > 0) {
+        specialMessageTimer -= deltaTime;
+        if (specialMessageTimer <= 0) {
+          specialMessage = null;
+        }
+      }
 
       gameTimeLeft -= deltaTime / 1000;
       timerDisplay.textContent = Math.max(0, Math.floor(gameTimeLeft));
@@ -379,9 +411,20 @@
           score++;
           scoreDisplay.textContent = score;
           target.hit = true;
+          target.isExiting = true;
+          target.exitX = x;
+          target.exitY = y;
           setTimeout(() => {
             targets.splice(i, 1);
           }, 200);
+
+          // Tambahkan pesan spesial tepat di lokasi target yang diklik
+          specialMessage = {
+            text: "When code sir?",
+            x: x,
+            y: y
+          };
+          specialMessageTimer = 1000; // Tampilkan selama 1 detik
 
           // suara
           hitSound.currentTime = 0;
