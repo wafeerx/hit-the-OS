@@ -82,8 +82,7 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       padding: 20px;
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      flex-direction: column;      align-items: center;
       gap: 20px;
     }
 
@@ -151,8 +150,7 @@
   <h1>Hit the Ethereum OS</h1>
   <div id="game-container">
     <canvas id="gameCanvas"></canvas>
-    <div id="game-controls">
-      <div id="game-info">
+    <div id="game-controls">      <div id="game-info">
         <span>Skor: <span id="score">0</span></span>
         <span>Waktu: <span id="timer">60</span></span>
         <span>Skor Tertinggi: <span id="high-score">0</span></span>
@@ -301,9 +299,11 @@
     let specialMessage = null;
     let specialMessageTimer = 0;
 
+    // Posisi Lubang baru (3-2-3)
     const holePositions = [
-      { x: 100, y: 150 }, { x: 300, y: 150 }, { x: 500, y: 150 }, { x: 700, y: 150 },
-      { x: 200, y: 350 }, { x: 400, y: 350 }, { x: 600, y: 350 }, { x: 800, y: 350 }
+      { x: 100, y: 150 }, { x: 300, y: 150 }, { x: 500, y: 150 },
+      { x: 200, y: 300 }, { x: 400, y: 300 },
+      { x: 100, y: 450 }, { x: 300, y: 450 }, { x: 500, y: 450 }
     ];
 
     // gambar
@@ -311,8 +311,7 @@
     ethOSLogo.src = 'photo_6030520145765582592_c.png';
     const holeImage = new Image();
     holeImage.src = createHoleSVG();
-    const hammerImage = new Image();
-    hammerImage.src = '1efe1d23e010ac80d4d4fd5cbbd5e60e.png';
+    const hammerImage = new Image();    hammerImage.src = '1efe1d23e010ac80d4d4fd5cbbd5e60e.png';
 
     let imagesLoadedCount = 0;
     const totalImages = 3;
@@ -331,8 +330,7 @@
       ethOSLogo.src = 'https://placehold.co/80x80/2980b9/ffffff?text=OS';
       checkImagesLoaded();
     };
-    holeImage.onload = checkImagesLoaded;
-    hammerImage.onload = checkImagesLoaded;
+    holeImage.onload = checkImagesLoaded;    hammerImage.onload = checkImagesLoaded;
 
     resizeCanvas();
 
@@ -442,8 +440,7 @@
       if (specialMessage) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
         ctx.font = 'bold 24px Inter';
-        ctx.textAlign = 'center';
-        ctx.fillText(specialMessage.text, specialMessage.x, specialMessage.y);
+        ctx.textAlign = 'center';        ctx.fillText(specialMessage.text, specialMessage.x, specialMessage.y);
       }
 
       if (!gameRunning) {
@@ -544,8 +541,7 @@
         return !targets.some(target => target.x === hole.x && target.y === hole.y);
       });
       if (availableHoles.length > 0) {
-        const randomHole = availableHoles[Math.floor(Math.random() * availableHoles.length)];
-        targets.push(new Target(randomHole));
+        const randomHole = availableHoles[Math.floor(Math.random() * availableHoles.length)];        targets.push(new Target(randomHole));
       }
     }
 
@@ -592,9 +588,7 @@
       }
     }
 
-    startGameBtn.addEventListener('click', startGame);
-
-    // disable context menu
+    startGameBtn.addEventListener('click', startGame);    // disable context menu
     canvas.addEventListener('contextmenu', e => e.preventDefault());
 
     // helper SVG
