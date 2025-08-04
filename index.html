@@ -2,9 +2,25 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#302b63">
   <title>Hit the Ethereum OS</title>
   <style>
+    :root {
+      --base-font-size: 16px;
+      --container-width: 90%;
+      --max-container-width: 900px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
       display: flex;
@@ -16,16 +32,49 @@
       color: #e0e0e0;
       margin: 0;
       padding: 20px;
+      overscroll-behavior: none;
     }
+
+    @media screen and (max-width: 768px) {
+      :root {
+        --base-font-size: 14px;
+        --container-width: 95%;
+      }
+
+      body {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    @media screen and (min-width: 769px) {
+      :root {
+        --base-font-size: 16px;
+        --container-width: 90%;
+      }
+
+      body {
+        padding: 20px;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+      }
+    }
+
     h1 {
-      font-size: 2.5rem;
       color: #ffffff;
       text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
       margin-bottom: 20px;
+      text-align: center;
     }
+
     #game-container {
-      width: 90%;
-      max-width: 900px;
+      width: var(--container-width);
+      max-width: var(--max-container-width);
       background: rgba(255, 255, 255, 0.1);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
@@ -37,32 +86,39 @@
       align-items: center;
       gap: 20px;
     }
+
     canvas {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      max-height: 70vh;
       border: 2px solid rgba(255, 255, 255, 0.3);
       background: rgba(0, 0, 0, 0.2);
       border-radius: 10px;
       cursor: none;
       touch-action: none;
-      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
     }
+
     #game-controls {
       display: flex;
       flex-direction: column;
       align-items: center;
       width: 100%;
     }
+
     #game-info {
       display: flex;
       justify-content: space-around;
       width: 100%;
-      font-size: 1.5rem;
+      font-size: 1rem;
       font-weight: bold;
       color: #ffffff;
       margin-bottom: 20px;
     }
+
     button {
-      padding: 12px 24px;
-      font-size: 1.2rem;
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
       font-weight: bold;
       color: white;
       background: linear-gradient(135deg, #a73cff, #5e00b8);
@@ -72,16 +128,19 @@
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
       transition: all 0.3s ease;
     }
+
     button:disabled {
       background: #4a4a5a;
       cursor: not-allowed;
       transform: translateY(0);
       box-shadow: none;
     }
+
     button:hover:enabled {
       background: linear-gradient(135deg, #c261ff, #7f2ad8);
       transform: translateY(-2px);
     }
+
     button:active:enabled {
       transform: translateY(0);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -119,8 +178,92 @@
     const container = document.getElementById('game-container');
     let gameWidth, gameHeight;
 
-    // resize
-    window.addEventListener('resize', resizeCanvas);
+    // Deteksi perangkat
+    function isMobileDevice() {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    }
+
+    // Konfigurasi kontrol berdasarkan perangkat
+    function setupControls() {
+      const isMobile = isMobileDevice();
+
+      if (isMobile) {
+        // Nonaktifkan zoom
+        const metaViewport = document.querySelector('meta[name="viewport"]');
+        if (!metaViewport) {
+          const meta = document.createElement('meta');
+          meta.name = 'viewport';
+          meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+          document.head.appendChild(meta);
+        }
+
+        // Event listener khusus mobile
+        canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+        canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+        canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+        // Nonaktifkan scroll
+        document.body.style.overflow = 'hidden';
+      } else {
+        // Event listener untuk desktop
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('mousedown', handleMouseDown);
+        canvas.addEventListener('mouseup', handleMouseUp);
+      }
+    }
+
+    // Handler untuk touch mobile
+    function handleTouchStart(e) {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+
+      // Konversi koordinat touch ke koordinat canvas
+      const x = (touch.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
+      const y = (touch.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
+
+      mouseX = x;
+      mouseY = y;
+      hammerHit = true;
+
+      checkHit({
+        clientX: touch.clientX,
+        clientY: touch.clientY
+      });
+    }
+
+    function handleTouchMove(e) {
+      e.preventDefault();
+      if (e.touches.length > 0) {
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+
+        mouseX = (touch.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
+        mouseY = (touch.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
+      }
+    }
+
+    function handleTouchEnd() {
+      hammerHit = false;
+    }
+
+    // Handler untuk mouse desktop
+    function handleMouseMove(e) {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = (e.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
+      mouseY = (e.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
+    }
+
+    function handleMouseDown(e) {
+      hammerHit = true;
+      checkHit(e);
+    }
+
+    function handleMouseUp() {
+      hammerHit = false;
+    }
+
+    // Resize canvas responsif
     function resizeCanvas() {
       gameWidth = container.clientWidth - 40;
       gameHeight = gameWidth * 0.75;
@@ -128,6 +271,16 @@
       canvas.height = gameHeight;
       draw();
     }
+
+    // Panggil setup kontrol dan resize saat dokumen siap
+    document.addEventListener('DOMContentLoaded', () => {
+      setupControls();
+      resizeCanvas();
+
+      // Tambahkan event listener resize
+      window.addEventListener('resize', resizeCanvas);
+      window.addEventListener('orientationchange', resizeCanvas);
+    });
 
     let score = 0;
     let highScore = +localStorage.getItem('ethereumOSHighScore') || 0;
@@ -143,7 +296,7 @@
     let mouseX = 0;
     let mouseY = 0;
     let hammerHit = false;
-    
+
     // Variabel untuk pesan spesial
     let specialMessage = null;
     let specialMessageTimer = 0;
@@ -288,7 +441,7 @@
       // Rendering pesan spesial
       if (specialMessage) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-        ctx.font = 'bold 24px Inter'; // Ukuran font lebih kecil
+        ctx.font = 'bold 24px Inter';
         ctx.textAlign = 'center';
         ctx.fillText(specialMessage.text, specialMessage.x, specialMessage.y);
       }
@@ -440,31 +593,6 @@
     }
 
     startGameBtn.addEventListener('click', startGame);
-
-    canvas.addEventListener('mousemove', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      mouseX = (e.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
-      mouseY = (e.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
-    });
-
-    canvas.addEventListener('mousedown', (e) => {
-      hammerHit = true;
-      checkHit(e);
-    });
-    canvas.addEventListener('mouseup', () => {
-      hammerHit = false;
-    });
-    canvas.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      const rect = canvas.getBoundingClientRect();
-      mouseX = (e.touches[0].clientX - rect.left) / (rect.right - rect.left) * canvas.width;
-      mouseY = (e.touches[0].clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
-      hammerHit = true;
-      checkHit(e);
-    }, { passive: false });
-    canvas.addEventListener('touchend', () => {
-      hammerHit = false;
-    });
 
     // disable context menu
     canvas.addEventListener('contextmenu', e => e.preventDefault());
